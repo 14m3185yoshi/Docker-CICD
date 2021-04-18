@@ -6,10 +6,10 @@ services: docker
 
 # 3.インストールする前にコンテナを起動させる。
 before_install:
-  - docker compose up --build -d
+  - docker-compose up --build -d
 
 # 4. DBの準備。テストの実行。
 script:
-  - docker compose exec --env 'RAILS_ENV=test' web rails db:create
-  - docker compose exec --env 'RAILS_ENV=test' web rails db:migrate
-  - docker compose exec --env 'RAILS_ENV=test' web rails test
+  - docker-compose exec --env 'RAILS_ENV=test' web rails db:create
+  - docker-compose exec --env 'RAILS_ENV=test' web rails db:migrate
+  - docker-compose exec --env 'RAILS_ENV=test' web rails test
