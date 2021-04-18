@@ -7,9 +7,28 @@ services: docker
 # 3.インストールする前にコンテナを起動させる。
 before_install:
   - docker-compose up --build -d
+  # heroku等の本番環境ではDockerレジストリというDockerでデプロイするためのものがあるのでそこにログインする
+  # -u -pはDockerにログインする際に聞かれるが、途中で作業を止めるわけにはいかないので、ここで指定しておく。
+
+  - docker login -u "$HEROKU_USERNAME" -p "$HEROKU_API_KEY" registry.heroku.com
 
 # 4. DBの準備。テストの実行。
 script:
   - docker-compose exec --env 'RAILS_ENV=test' web rails db:create
   - docker-compose exec --env 'RAILS_ENV=test' web rails db:migrate
   - docker-compose exec --env 'RAILS_ENV=test' web rails test
+
+deploy:
+  provider: script
+  script:
+    # 本番環境用にイメージを作成する。
+    # -tでイメージ名を作成するときにタグの名前を指定する。-fで別のディレクトリにあるDockerファイルを現在のところにコピーする。
+    docker build -t registry.heroku.com/$HEROKU_APP_NAME/web -f Dockerfile.prod .;
+    # herokuのDockerレジストリにpushする。
+    docker push registry.heroku.com/$HEROKU_APP_NAME/web;
+    アプリ名を指定して起動。さらにdb_migrateを実行する。
+    heroku run --app $HEROKU_APP_NAME rails db:migrate;
+
+    # デプロイはmasterにmergeされたときだけ実行されるように。
+    on:
+      branch: master
