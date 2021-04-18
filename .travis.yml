@@ -7,7 +7,7 @@ services: docker
 # 3.インストールする前にコンテナを起動させる。
 before_install:
   - docker-compose up --build -d
-  # heroku等の本番環境ではDockerレジストリというDockerでデプロイするためのものがあるのでそこにログインする
+  # heroku等の本番環境ではDockerレジストリというDockerでデプロイするためのものがあるのでそこにログインする。
   # -u -pはDockerにログインする際に聞かれるが、途中で作業を止めるわけにはいかないので、ここで指定しておく。
 
   - docker login -u "$HEROKU_USERNAME" -p "$HEROKU_API_KEY" registry.heroku.com
