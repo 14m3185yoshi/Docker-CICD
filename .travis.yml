@@ -1,0 +1,15 @@
+# 1. 権限の設定。sudo権限で実行する。
+sudo: required
+
+# 2. Dockerを使う宣言。
+services: docker
+
+# 3.インストールする前にコンテナを起動させる。
+before_install:
+  - docker compose up --build -d
+
+# 4. DBの準備。テストの実行
+script:
+  - docker compose exec --env 'RAILS_ENV=test' web rails db:create
+  - docker compose exec --env 'RAILS_ENV=test' web rails db:migrate
+  - docker compose exec --env 'RAILS_ENV=test' web rails test
