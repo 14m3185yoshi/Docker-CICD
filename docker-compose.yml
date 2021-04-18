@@ -1,0 +1,43 @@
+# 決まり文句
+version: '3'
+# コンテナが消えたらデータも消えてしまうので、ホスト側で蓄積(他のdockerfileとも共有できる)されるように、docker volumeを使い、保管する。
+volumes:
+  db-data:
+
+services:
+  # なんでもok(多いのはwebやappなど)
+  web:
+    # 「docker build .」をしていると同じ
+    # もしimageを使いたいなら、下記のようにする。
+    # image: image_name
+    build: .
+    # 「-p 3000:3000」と同じ
+    ports:
+      - '3000:3000'
+    # 「-vオプション。マウント」
+    volumes:
+      - '.:/product-register'
+    # コンテナ内の環境変数を作成する。
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+    # 「-tオプション」
+    tty: true
+    # 「-iオプション」
+    stdin_open: true
+    # 下記のdbが実行された後に、webが実行される。
+    depends_on:
+      - db
+    # webからdbにアクセスできるようになる。
+    links:
+      - db
+
+  # なんでもok(大抵のひとはここはdbにする)
+  # データベース(postgres)に関してはイメージがあるのでdockerfileは書かないでもいい。
+  db:
+    image: postgres
+    # コンテナが消えたらデータも消えてしまうので、ホスト側で蓄積(他のdockerfileとも共有できる)されるように、docker volumeを使い、保管する。
+    volumes:
+      - 'db-data:/var/lib/postgresql/data'
+    environment:
+      - 'POSTGRES_PASSWORD=postgres'
